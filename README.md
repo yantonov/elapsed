@@ -3,6 +3,15 @@ Calculates number of full days, months, years passed since given day.
 
 Examples:
 ```
+elapsed since 2020-12-01 2020-12-01
+0 days
+
+elapsed since 2020-12-01 2020-12-02
+0 days
+
+elapsed since 2020-12-01 2020-12-03
+1 day
+
 elapsed since 2020-05-04 2020-05-10
 5 days
 
