@@ -1,1 +1,5 @@
+# ide specific files
+.idea/
+
+# build artifacts
 /target
