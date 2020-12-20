@@ -13,20 +13,21 @@ pub struct Duration {
     total_days: DayImpl,
 }
 
+#[allow(unused)]
 impl Duration {
-    pub fn year(&self) -> YearImpl {
+    fn year(&self) -> YearImpl {
         return self.year;
     }
 
-    pub fn month(&self) -> MonthImpl {
+    fn month(&self) -> MonthImpl {
         return self.month;
     }
 
-    pub fn day(&self) -> DayImpl {
+    fn day(&self) -> DayImpl {
         return self.day;
     }
 
-    pub fn total_days(&self) -> DayImpl {
+    fn total_days(&self) -> DayImpl {
         return self.total_days;
     }
 }
