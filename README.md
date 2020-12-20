@@ -1,4 +1,5 @@
 [![Build Actions Status](https://github.com/yantonov/elapsed/workflows/ci/badge.svg)](https://github.com/yantonov/elapsed/actions)
+
 Calculates number of full days, months, years passed since given day.
 
 Examples:
