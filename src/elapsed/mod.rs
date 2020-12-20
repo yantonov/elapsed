@@ -10,6 +10,7 @@ pub struct Duration {
     year: YearImpl,
     month: MonthImpl,
     day: DayImpl,
+    total_days: DayImpl,
 }
 
 impl Duration {
@@ -23,6 +24,10 @@ impl Duration {
 
     pub fn day(&self) -> DayImpl {
         return self.day;
+    }
+
+    pub fn total_days(&self) -> DayImpl {
+        return self.total_days;
     }
 }
 
@@ -44,7 +49,16 @@ impl ToString for Duration {
             let tokens: Vec<String> = vec![
                 format_num(self.year as i32, "year", "years"),
                 format_num(self.month as i32, "month", "months"),
-                format_num(self.day as i32, "day", "days")
+                format_num(self.day as i32, "day", "days"),
+                if self.year == 0 && self.month == 0 {
+                    "".to_string()
+                } else {
+                    if self.total_days == 0 {
+                        "".to_string()
+                    } else {
+                        format!("({})", format_num(self.total_days as i32, "day", "days"))
+                    }
+                }
             ].into_iter()
                 .filter(|x| !x.is_empty())
                 .collect();
@@ -91,10 +105,12 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
         year += 1;
         month -= 12;
     }
+
     Ok(Duration {
         year,
         month,
         day: day_difference(from, to),
+        total_days: max(0, to.pred().signed_duration_since(from.clone()).num_days()) as DayImpl,
     })
 }
 
@@ -168,58 +184,74 @@ mod tests {
         assert_eq!(31 - 4 + 1 + 9, duration_day(
             2020, 12, 3,
             2021, 1, 10));
+        assert_eq!(58, duration_day(
+            2020, 1, 3,
+            2021, 1, 31));
+    }
+
+    #[test]
+    fn total_days() {
+        assert_eq!(0, duration_total_days(
+            2020, 2, 1,
+            2020, 2, 1));
+        assert_eq!(0, duration_total_days(
+            2020, 2, 1,
+            2020, 2, 2));
+        assert_eq!(6, duration_total_days(
+            2020, 2, 3,
+            2020, 2, 10));
+        assert_eq!(29 - 4 + 1 + 9, duration_total_days(
+            2020, 2, 3,
+            2020, 3, 10));
+        assert_eq!(31 - 4 + 1 + 9, duration_total_days(
+            2020, 3, 3,
+            2020, 4, 10));
+        assert_eq!(31 - 4 + 1 + 9, duration_total_days(
+            2020, 12, 3,
+            2021, 1, 10));
+        assert_eq!(364, duration_total_days(
+            2020, 1, 1,
+            2020, 12, 31));
+        assert_eq!(393, duration_total_days(
+            2020, 1, 3,
+            2021, 1, 31));
     }
 
     #[test]
     fn to_string() {
         assert_eq!("0 days",
-                   Duration {
-                       year: 0,
-                       month: 0,
-                       day: 0,
-                   }.to_string());
+                   duration(2020, 1, 1,
+                            2020, 1, 1).unwrap().to_string());
+        assert_eq!("0 days",
+                   duration(2020, 1, 1,
+                            2020, 1, 2).unwrap().to_string());
         assert_eq!("1 day",
-                   Duration {
-                       year: 0,
-                       month: 0,
-                       day: 1,
-                   }.to_string());
+                   duration(2020, 1, 1,
+                            2020, 1, 3).unwrap().to_string());
         assert_eq!("2 days",
-                   Duration {
-                       year: 0,
-                       month: 0,
-                       day: 2,
-                   }.to_string());
-        assert_eq!("1 month 1 day",
-                   Duration {
-                       year: 0,
-                       month: 1,
-                       day: 1,
-                   }.to_string());
-        assert_eq!("1 month 12 days",
-                   Duration {
-                       year: 0,
-                       month: 1,
-                       day: 12,
-                   }.to_string());
-        assert_eq!("2 months 12 days",
-                   Duration {
-                       year: 0,
-                       month: 2,
-                       day: 12,
-                   }.to_string());
-        assert_eq!("1 year 12 days",
-                   Duration {
-                       year: 1,
-                       month: 0,
-                       day: 12,
-                   }.to_string());
-        assert_eq!("2 years 2 months 12 days",
-                   Duration {
-                       year: 2,
-                       month: 2,
-                       day: 12,
-                   }.to_string());
+                   duration(2020, 1, 1,
+                            2020, 1, 4).unwrap().to_string());
+        assert_eq!("1 month 1 day (30 days)",
+                   duration(2020, 1, 30,
+                            2020, 3, 1).unwrap().to_string());
+        assert_eq!("1 month 2 days (31 days)",
+                   duration(2020, 1, 30,
+                            2020, 3, 2).unwrap().to_string());
+        assert_eq!("2 months 12 days (72 days)",
+                   duration(2020, 1, 30,
+                            2020, 4, 12).unwrap().to_string());
+        assert_eq!("2 months 12 days (72 days)",
+                   duration(2020, 1, 30,
+                            2020, 4, 12).unwrap().to_string());
+        assert_eq!("1 year 12 days (377 days)",
+                   duration(2020, 12, 30,
+                            2022, 1, 12).unwrap().to_string());
+        assert_eq!("2 years 2 months 12 days (801 days)",
+                   duration(2020, 12, 30,
+                            2023, 3, 12).unwrap().to_string());
+        assert_eq!("11 months 58 days (393 days)",
+                   duration(2020, 1, 3,
+                            2021, 01, 31).unwrap().to_string());
     }
 
     #[test]
@@ -267,5 +299,13 @@ mod tests {
                  to_year, to_month, to_day)
             .unwrap()
             .day()
+    }
+
+    fn duration_total_days(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
+                           to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
+        duration(from_year, from_month, from_day,
+                 to_year, to_month, to_day)
+            .unwrap()
+            .total_days()
     }
 }
