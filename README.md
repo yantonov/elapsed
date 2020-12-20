@@ -28,3 +28,10 @@ elapsed since 2020-01-03 2021-01-31
 elapsed since 2020-01-03 2021-02-01
 1 year 28 days
 ```
+
+To understand behaviour the following scenario may help.
+Let's suppose you met your friend sometime in the past (date 1).
+And you meet him/her again, for example today (date 2).
+You want to calculate how many days have you not seen each other (between date 1 and date 2).
+
+Moreover, when you consider months, only complete months between dates matters.
