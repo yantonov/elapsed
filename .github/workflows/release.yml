@@ -14,14 +14,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            executable: dot
-            asset_name: dot-linux
+            executable: elapsed
+            asset_name: elapsed-linux
           - os: windows-latest
-            executable: dot.exe
-            asset_name: dot-windows
+            executable: elapsed.exe
+            asset_name: elapsed-windows
           - os: macos-latest
-            executable: dot
-            asset_name: dot-macos
+            executable: elapsed
+            asset_name: elapsed-macos
 
     # build
     steps:
