@@ -16,7 +16,9 @@ pub enum Command {
 #[derive(Clap)]
 pub struct Since {
     #[clap(about = "format YYYY-MM-DD")]
-    pub date: String
+    pub date: String,
+
+    pub now: Option<String>,
 }
 
 pub struct Arguments {

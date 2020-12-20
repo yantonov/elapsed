@@ -14,7 +14,17 @@ fn main() {
                 .expect("Date should follow the YYYY-MM-DD format")
                 .date()
                 .naive_local();
-            let to = Utc::now().date().naive_local();
+            let to = match &since.now {
+                None => Utc::now().date().naive_local(),
+                Some(to_value) => {
+                    Utc.datetime_from_str(
+                        &format!("{} 00:00:00", to_value),
+                        "%Y-%m-%d %H:%M:%S")
+                        .expect("Date should follow the YYYY-MM-DD format")
+                        .date()
+                        .naive_local()
+                }
+            };
             println!("{}", elapsed::elapsed(&from, &to).unwrap().to_string());
         }
     }
