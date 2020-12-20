@@ -85,9 +85,15 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
     if from > to {
         return Err("'from' date should be less or equal to 'to' date".to_string());
     }
+    let mut month = month_difference(from, to);
+    let mut year = max(0, to.year() - 1 - (from.year() + 1) + 1);
+    if month > 12 {
+        year += 1;
+        month -= 12;
+    }
     Ok(Duration {
-        year: max(0, to.year() - 1 - (from.year() + 1) + 1),
-        month: month_difference(from, to),
+        year,
+        month,
         day: day_difference(from, to),
     })
 }
@@ -111,6 +117,9 @@ mod tests {
         assert_eq!(0, duration_year(
             2020, 1, 1,
             2020, 2, 20));
+        assert_eq!(2, duration_year(
+            2018, 2, 3,
+            2020, 8, 2));
     }
 
     #[test]
@@ -128,7 +137,7 @@ mod tests {
         assert_eq!(5, duration_month(
             year, 2, 3,
             year, 8, 2));
-        assert_eq!(10 + 7, duration_month(
+        assert_eq!(10 + 7 - 12, duration_month(
             2018, 2, 3,
             2020, 8, 2));
     }
@@ -209,9 +218,9 @@ mod tests {
 
     #[test]
     fn incorrect_date_order() {
-        let duration = elapsed(
-            &NaiveDate::from_ymd(2021, 1, 1),
-            &NaiveDate::from_ymd(2020, 1, 1));
+        let duration = duration(
+            2021, 1, 1,
+            2020, 1, 1);
         match duration {
             Ok(_) => {
                 panic!("error expected");
@@ -224,27 +233,33 @@ mod tests {
     }
 
     fn duration(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
-                to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> Duration {
+                to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> Result<Duration, String> {
         elapsed(
             &NaiveDate::from_ymd(from_year, from_month, from_day),
-            &NaiveDate::from_ymd(to_year, to_month, to_day)).unwrap()
+            &NaiveDate::from_ymd(to_year, to_month, to_day))
     }
 
     fn duration_year(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
                      to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> YearImpl {
         duration(from_year, from_month, from_day,
-                 to_year, to_month, to_day).year()
+                 to_year, to_month, to_day)
+            .unwrap()
+            .year()
     }
 
     fn duration_month(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
                       to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
         duration(from_year, from_month, from_day,
-                 to_year, to_month, to_day).month()
+                 to_year, to_month, to_day)
+            .unwrap()
+            .month()
     }
 
     fn duration_day(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
                     to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
         duration(from_year, from_month, from_day,
-                 to_year, to_month, to_day).day()
+                 to_year, to_month, to_day)
+            .unwrap()
+            .day()
     }
 }
