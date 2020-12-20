@@ -87,7 +87,7 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
     }
     let mut month = month_difference(from, to);
     let mut year = max(0, to.year() - 1 - (from.year() + 1) + 1);
-    if month > 12 {
+    if month >= 12 {
         year += 1;
         month -= 12;
     }
@@ -120,6 +120,9 @@ mod tests {
         assert_eq!(2, duration_year(
             2018, 2, 3,
             2020, 8, 2));
+        assert_eq!(1, duration_year(
+            2020, 1, 3,
+            2021, 2, 1));
     }
 
     #[test]
@@ -140,6 +143,9 @@ mod tests {
         assert_eq!(10 + 7 - 12, duration_month(
             2018, 2, 3,
             2020, 8, 2));
+        assert_eq!(0, duration_month(
+            2020, 1, 3,
+            2021, 2, 1));
     }
 
     #[test]
