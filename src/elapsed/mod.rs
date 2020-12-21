@@ -319,9 +319,6 @@ mod tests {
         assert_eq!("2 months 12 days (72 days)",
                    duration(2020, 1, 30,
                             2020, 4, 12).unwrap().to_string());
-        assert_eq!("2 months 12 days (72 days)",
-                   duration(2020, 1, 30,
-                            2020, 4, 12).unwrap().to_string());
         assert_eq!("1 year 12 days (377 days)",
                    duration(2020, 12, 30,
                             2022, 1, 12).unwrap().to_string());
