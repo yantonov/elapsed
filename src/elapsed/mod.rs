@@ -38,7 +38,11 @@ struct DaysFormatter {}
 
 impl DurationFormatter for DaysFormatter {
     fn format(&self, duration: &Duration) -> String {
-        format!("{}", format_num(duration.total_days as i32, "day", "days"))
+        if duration.total_days == 0 {
+            "0 days".to_string()
+        } else {
+            format!("{}", format_num(duration.total_days as i32, "day", "days"))
+        }
     }
 }
 
@@ -106,26 +110,6 @@ impl DurationFormatter for DefaultFormatter {
 }
 
 impl Duration {
-    #[allow(unused)]
-    fn year(&self) -> YearImpl {
-        return self.year;
-    }
-
-    #[allow(unused)]
-    fn month(&self) -> MonthImpl {
-        return self.month;
-    }
-
-    #[allow(unused)]
-    fn day(&self) -> DayImpl {
-        return self.day;
-    }
-
-    #[allow(unused)]
-    fn total_days(&self) -> DayImpl {
-        return self.total_days;
-    }
-
     pub fn format(&self, format_type: &FormatType) -> String {
         let formatter: &dyn DurationFormatter = match format_type {
             FormatType::Days => &DaysFormatter {},
@@ -199,99 +183,49 @@ mod tests {
     use super::*;
 
     #[test]
-    fn year() {
-        assert_eq!(2, duration_year(
-            2017, 3, 31,
-            2020, 2, 20));
-        assert_eq!(1, duration_year(
-            2018, 3, 31,
-            2020, 2, 20));
-        assert_eq!(0, duration_year(
-            2019, 3, 31,
-            2020, 2, 20));
-        assert_eq!(0, duration_year(
-            2020, 1, 1,
-            2020, 2, 20));
-        assert_eq!(2, duration_year(
-            2018, 2, 3,
-            2020, 8, 2));
-        assert_eq!(1, duration_year(
-            2020, 1, 3,
-            2021, 2, 1));
-    }
-
-    #[test]
-    fn month() {
+    fn year_month_format_test() {
         let year = 2020;
-        assert_eq!(0, duration_month(
+        assert_eq!("0 days", year_month_format(
             year, 2, 3,
             year, 2, 4));
-        assert_eq!(0, duration_month(
+        assert_eq!("27 days", year_month_format(
             year, 2, 3,
             year, 3, 2));
-        assert_eq!(1, duration_month(
+        assert_eq!("1 month 27 days", year_month_format(
             year, 2, 3,
             year, 4, 2));
-        assert_eq!(5, duration_month(
+        assert_eq!("5 months 27 days", year_month_format(
             year, 2, 3,
             year, 8, 2));
-        assert_eq!(10 + 7 - 12, duration_month(
-            2018, 2, 3,
-            2020, 8, 2));
-        assert_eq!(0, duration_month(
+        assert_eq!("1 year 28 days", year_month_format(
             2020, 1, 3,
             2021, 2, 1));
+        assert_eq!("2 years 5 months 26 days", year_month_format(
+            2018, 2, 3,
+            2020, 8, 2));
     }
 
     #[test]
-    fn day() {
-        assert_eq!(0, duration_day(
+    fn days_format_test() {
+        assert_eq!("0 days", days_format(
             2020, 2, 1,
             2020, 2, 1));
-        assert_eq!(0, duration_day(
+        assert_eq!("0 days", days_format(
             2020, 2, 1,
             2020, 2, 2));
-        assert_eq!(6, duration_day(
+        assert_eq!("6 days", days_format(
             2020, 2, 3,
             2020, 2, 10));
-        assert_eq!(29 - 4 + 1 + 9, duration_day(
+        assert_eq!("35 days", days_format(
             2020, 2, 3,
             2020, 3, 10));
-        assert_eq!(31 - 4 + 1 + 9, duration_day(
+        assert_eq!("37 days", days_format(
             2020, 3, 3,
             2020, 4, 10));
-        assert_eq!(31 - 4 + 1 + 9, duration_day(
+        assert_eq!("37 days", days_format(
             2020, 12, 3,
             2021, 1, 10));
-        assert_eq!(58, duration_day(
-            2020, 1, 3,
-            2021, 1, 31));
-    }
-
-    #[test]
-    fn total_days() {
-        assert_eq!(0, duration_total_days(
-            2020, 2, 1,
-            2020, 2, 1));
-        assert_eq!(0, duration_total_days(
-            2020, 2, 1,
-            2020, 2, 2));
-        assert_eq!(6, duration_total_days(
-            2020, 2, 3,
-            2020, 2, 10));
-        assert_eq!(29 - 4 + 1 + 9, duration_total_days(
-            2020, 2, 3,
-            2020, 3, 10));
-        assert_eq!(31 - 4 + 1 + 9, duration_total_days(
-            2020, 3, 3,
-            2020, 4, 10));
-        assert_eq!(31 - 4 + 1 + 9, duration_total_days(
-            2020, 12, 3,
-            2021, 1, 10));
-        assert_eq!(364, duration_total_days(
-            2020, 1, 1,
-            2020, 12, 31));
-        assert_eq!(393, duration_total_days(
+        assert_eq!("393 days", days_format(
             2020, 1, 3,
             2021, 1, 31));
     }
@@ -331,7 +265,7 @@ mod tests {
     }
 
     #[test]
-    fn year_days() {
+    fn year_days_format_test() {
         assert_eq!("0 days",
                    year_day_format(2020, 1, 1,
                                    2020, 1, 1));
@@ -387,36 +321,20 @@ mod tests {
             &NaiveDate::from_ymd(to_year, to_month, to_day))
     }
 
-    fn duration_year(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
-                     to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> YearImpl {
+    fn year_month_format(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
+                         to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> String {
         duration(from_year, from_month, from_day,
                  to_year, to_month, to_day)
             .unwrap()
-            .year()
+            .format(&FormatType::YearMonth)
     }
 
-    fn duration_month(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
-                      to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
+    fn days_format(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
+                   to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> String {
         duration(from_year, from_month, from_day,
                  to_year, to_month, to_day)
             .unwrap()
-            .month()
-    }
-
-    fn duration_day(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
-                    to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
-        duration(from_year, from_month, from_day,
-                 to_year, to_month, to_day)
-            .unwrap()
-            .day()
-    }
-
-    fn duration_total_days(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
-                           to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> MonthImpl {
-        duration(from_year, from_month, from_day,
-                 to_year, to_month, to_day)
-            .unwrap()
-            .total_days()
+            .format(&FormatType::Days)
     }
 
     fn year_day_format(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
