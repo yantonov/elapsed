@@ -336,60 +336,35 @@ mod tests {
     #[test]
     fn year_days() {
         assert_eq!("0 days",
-                   duration(2020, 1, 1,
-                            2020, 1, 1)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 1,
+                                   2020, 1, 1));
         assert_eq!("0 days",
-                   duration(2020, 1, 1,
-                            2020, 1, 2)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 1,
+                                   2020, 1, 2));
         assert_eq!("1 day",
-                   duration(2020, 1, 1,
-                            2020, 1, 3)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 1,
+                                   2020, 1, 3));
         assert_eq!("2 days",
-                   duration(2020, 1, 1,
-                            2020, 1, 4)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 1,
+                                   2020, 1, 4));
         assert_eq!("30 days",
-                   duration(2020, 1, 30,
-                            2020, 3, 1)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 30,
+                                   2020, 3, 1));
         assert_eq!("31 days",
-                   duration(2020, 1, 30,
-                            2020, 3, 2)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 30,
+                                   2020, 3, 2));
         assert_eq!("72 days",
-                   duration(2020, 1, 30,
-                            2020, 4, 12)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
-        assert_eq!("72 days",
-                   duration(2020, 1, 30,
-                            2020, 4, 12)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 30,
+                                   2020, 4, 12));
         assert_eq!("1 year 12 days",
-                   duration(2020, 12, 30,
-                            2022, 1, 12)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 12, 30,
+                                   2022, 1, 12));
         assert_eq!("2 years 71 days",
-                   duration(2020, 12, 30,
-                            2023, 3, 12)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 12, 30,
+                                   2023, 3, 12));
         assert_eq!("1 year 28 days",
-                   duration(2020, 1, 3,
-                            2021, 01, 31)
-                       .unwrap()
-                       .format(&FormatType::YearDay));
+                   year_day_format(2020, 1, 3,
+                                   2021, 01, 31));
     }
 
     #[test]
@@ -445,5 +420,14 @@ mod tests {
                  to_year, to_month, to_day)
             .unwrap()
             .total_days()
+    }
+
+    fn year_day_format(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
+                       to_year: YearImpl, to_month: MonthImpl, to_day: DayImpl) -> String {
+        elapsed(
+            &NaiveDate::from_ymd(from_year, from_month, from_day),
+            &NaiveDate::from_ymd(to_year, to_month, to_day))
+            .unwrap()
+            .format(&FormatType::YearDay)
     }
 }
