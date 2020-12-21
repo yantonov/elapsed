@@ -186,7 +186,10 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
         year,
         month,
         day: day_difference(from, to),
-        total_days: max(0, to.pred().signed_duration_since(from.clone()).num_days()) as DayImpl,
+        total_days: max(0, to
+            .pred()
+            .signed_duration_since(from.clone())
+            .num_days()) as DayImpl,
     })
 }
 
