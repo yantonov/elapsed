@@ -1,5 +1,6 @@
 use clap::{Clap, crate_version};
 use std::str::FromStr;
+use chrono::{NaiveDate, Utc, TimeZone};
 
 #[derive(Clap)]
 #[clap(version = crate_version ! ())]
@@ -54,6 +55,31 @@ impl Since {
                 SinceFormat::from_str(x)
             }
         }
+    }
+
+    pub fn get_from(&self) -> Result<NaiveDate, String> {
+        let parsed_from_date = Utc.datetime_from_str(
+            &format!("{} 00:00:00", self.date),
+            "%Y-%m-%d %H:%M:%S")
+            .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())?;
+        Ok(parsed_from_date
+            .date()
+            .naive_local())
+    }
+
+    pub fn get_to(&self) -> Result<NaiveDate, String> {
+        Ok(match &self.now {
+            None => Utc::now().date().naive_local(),
+            Some(now_value) => {
+                let parsed_to_date = Utc.datetime_from_str(
+                    &format!("{} 00:00:00", now_value),
+                    "%Y-%m-%d %H:%M:%S")
+                    .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())?;
+                parsed_to_date
+                    .date()
+                    .naive_local()
+            }
+        })
     }
 }
 
