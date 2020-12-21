@@ -13,25 +13,6 @@ pub struct Duration {
     total_days: DayImpl,
 }
 
-#[allow(unused)]
-impl Duration {
-    fn year(&self) -> YearImpl {
-        return self.year;
-    }
-
-    fn month(&self) -> MonthImpl {
-        return self.month;
-    }
-
-    fn day(&self) -> DayImpl {
-        return self.day;
-    }
-
-    fn total_days(&self) -> DayImpl {
-        return self.total_days;
-    }
-}
-
 fn format_num(value: i32, suffix_single: &str, suffix_plural: &str) -> String {
     match value {
         0 => {
@@ -42,29 +23,123 @@ fn format_num(value: i32, suffix_single: &str, suffix_plural: &str) -> String {
     }
 }
 
-impl ToString for Duration {
-    fn to_string(&self) -> String {
-        if self.year == 0 && self.month == 0 && self.day == 0 {
+trait DurationFormatter {
+    fn format(&self, duration: &Duration) -> String;
+}
+
+pub enum FormatType {
+    Days,
+    YearMonth,
+    YearDay,
+    Default,
+}
+
+struct DaysFormatter {}
+
+impl DurationFormatter for DaysFormatter {
+    fn format(&self, duration: &Duration) -> String {
+        format!("{}", format_num(duration.total_days as i32, "day", "days"))
+    }
+}
+
+struct YearMonthFormatter {}
+
+impl DurationFormatter for YearMonthFormatter {
+    fn format(&self, duration: &Duration) -> String {
+        if duration.year == 0 && duration.month == 0 && duration.day == 0 {
             "0 days".to_string()
         } else {
             let tokens: Vec<String> = vec![
-                format_num(self.year as i32, "year", "years"),
-                format_num(self.month as i32, "month", "months"),
-                format_num(self.day as i32, "day", "days"),
-                if self.year == 0 && self.month == 0 {
-                    "".to_string()
-                } else {
-                    if self.total_days == 0 {
-                        "".to_string()
-                    } else {
-                        format!("({})", format_num(self.total_days as i32, "day", "days"))
-                    }
-                }
+                format_num(duration.year as i32, "year", "years"),
+                format_num(duration.month as i32, "month", "months"),
+                format_num(duration.day as i32, "day", "days"),
             ].into_iter()
                 .filter(|x| !x.is_empty())
                 .collect();
             tokens.join(" ")
         }
+    }
+}
+
+struct YearDaysFormatter {}
+
+impl DurationFormatter for YearDaysFormatter {
+    fn format(&self, duration: &Duration) -> String {
+        match duration.total_days {
+            0 => "0 days".to_string(),
+            _ => {
+                let year_day_count = 365;
+                let year = duration.total_days / year_day_count;
+                let days = duration.total_days % year_day_count;
+                if year == 0 {
+                    format_num(days as i32, "day", "days")
+                } else {
+                    if days == 0 {
+                        format_num(year as i32, "year", "years")
+                    } else {
+                        format!("{} {}",
+                                format_num(year as i32, "year", "years"),
+                                format_num(days as i32, "day", "days"))
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DefaultFormatter {}
+
+impl DurationFormatter for DefaultFormatter {
+    fn format(&self, duration: &Duration) -> String {
+        let tokens: Vec<String> = vec![
+            YearMonthFormatter {}.format(duration),
+            if (duration.year == 0 && duration.month == 0) || duration.total_days == 0 {
+                "".to_string()
+            } else {
+                format!("({})", DaysFormatter {}.format(duration))
+            }
+        ].into_iter()
+            .filter(|x| !x.is_empty())
+            .collect();
+        tokens.join(" ")
+    }
+}
+
+impl Duration {
+    #[allow(unused)]
+    fn year(&self) -> YearImpl {
+        return self.year;
+    }
+
+    #[allow(unused)]
+    fn month(&self) -> MonthImpl {
+        return self.month;
+    }
+
+    #[allow(unused)]
+    fn day(&self) -> DayImpl {
+        return self.day;
+    }
+
+    #[allow(unused)]
+    fn total_days(&self) -> DayImpl {
+        return self.total_days;
+    }
+
+    pub fn format(&self, format_type: &FormatType) -> String {
+        let formatter: &dyn DurationFormatter = match format_type {
+            FormatType::Days => &DaysFormatter {},
+            FormatType::YearMonth => &YearMonthFormatter {},
+            FormatType::Default => &DefaultFormatter {},
+            FormatType::YearDay => &YearDaysFormatter {}
+        };
+        formatter.format(self)
+    }
+}
+
+impl ToString for Duration {
+    fn to_string(&self) -> String {
+        self.format(&FormatType::Default)
     }
 }
 
@@ -253,6 +328,65 @@ mod tests {
         assert_eq!("11 months 58 days (393 days)",
                    duration(2020, 1, 3,
                             2021, 01, 31).unwrap().to_string());
+    }
+
+    #[test]
+    fn year_days() {
+        assert_eq!("0 days",
+                   duration(2020, 1, 1,
+                            2020, 1, 1)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("0 days",
+                   duration(2020, 1, 1,
+                            2020, 1, 2)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("1 day",
+                   duration(2020, 1, 1,
+                            2020, 1, 3)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("2 days",
+                   duration(2020, 1, 1,
+                            2020, 1, 4)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("30 days",
+                   duration(2020, 1, 30,
+                            2020, 3, 1)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("31 days",
+                   duration(2020, 1, 30,
+                            2020, 3, 2)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("72 days",
+                   duration(2020, 1, 30,
+                            2020, 4, 12)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("72 days",
+                   duration(2020, 1, 30,
+                            2020, 4, 12)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("1 year 12 days",
+                   duration(2020, 12, 30,
+                            2022, 1, 12)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("2 years 71 days",
+                   duration(2020, 12, 30,
+                            2023, 3, 12)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
+        assert_eq!("1 year 28 days",
+                   duration(2020, 1, 3,
+                            2021, 01, 31)
+                       .unwrap()
+                       .format(&FormatType::YearDay));
     }
 
     #[test]

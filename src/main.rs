@@ -1,6 +1,7 @@
-use crate::cli::Command;
+use crate::cli::{Command, SinceFormat};
 use chrono::{Utc, TimeZone, NaiveDate};
 use colored::Colorize;
+use crate::elapsed::FormatType;
 
 mod cli;
 mod elapsed;
@@ -36,7 +37,15 @@ fn entry_point() -> Result<(), String> {
         Command::Since(since) => {
             let from = get_from(&since.date)?;
             let to = get_to(&since.now)?;
-            println!("{}", elapsed::elapsed(&from, &to).unwrap().to_string());
+            let result = since.format()?;
+            println!("{}", elapsed::elapsed(&from, &to)
+                .unwrap()
+                .format(&match result {
+                    SinceFormat::Days => FormatType::Days,
+                    SinceFormat::YearDay => FormatType::YearDay,
+                    SinceFormat::YearMonth => FormatType::YearMonth,
+                    SinceFormat::Default => FormatType::Default
+                }));
         }
     }
     Ok(())
