@@ -16,7 +16,7 @@ pub enum Command {
 }
 
 pub enum SinceFormat {
-    Days,
+    Day,
     YearDay,
     YearMonth,
     Default,
@@ -27,7 +27,7 @@ impl FromStr for SinceFormat {
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "days" => Ok(SinceFormat::Days),
+            "day" => Ok(SinceFormat::Day),
             "year-day" => Ok(SinceFormat::YearDay),
             "year-month" => Ok(SinceFormat::YearMonth),
             "default" => Ok(SinceFormat::Default),
@@ -41,7 +41,7 @@ pub struct Since {
     #[clap(about = "format YYYY-MM-DD")]
     pub date: String,
 
-    #[clap(about = "days | year-day | year-month | default", short, long,)]
+    #[clap(about = "day | year-day | year-month | default", short, long,)]
     pub format: Option<String>,
 
     pub now: Option<String>,

@@ -15,7 +15,7 @@ fn entry_point() -> Result<(), String> {
             println!("{}", elapsed::elapsed(&from, &to)
                 .unwrap()
                 .format(&match result {
-                    SinceFormat::Days => FormatType::Days,
+                    SinceFormat::Day => FormatType::Day,
                     SinceFormat::YearDay => FormatType::YearDay,
                     SinceFormat::YearMonth => FormatType::YearMonth,
                     SinceFormat::Default => FormatType::Default

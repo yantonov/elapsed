@@ -28,15 +28,15 @@ trait DurationFormatter {
 }
 
 pub enum FormatType {
-    Days,
+    Day,
     YearMonth,
     YearDay,
     Default,
 }
 
-struct DaysFormatter {}
+struct DayFormatter {}
 
-impl DurationFormatter for DaysFormatter {
+impl DurationFormatter for DayFormatter {
     fn format(&self, duration: &Duration) -> String {
         if duration.total_days == 0 {
             "0 days".to_string()
@@ -100,7 +100,7 @@ impl DurationFormatter for DefaultFormatter {
             if (duration.year == 0 && duration.month == 0) || duration.total_days == 0 {
                 "".to_string()
             } else {
-                format!("({})", DaysFormatter {}.format(duration))
+                format!("({})", DayFormatter {}.format(duration))
             }
         ].into_iter()
             .filter(|x| !x.is_empty())
@@ -112,7 +112,7 @@ impl DurationFormatter for DefaultFormatter {
 impl Duration {
     pub fn format(&self, format_type: &FormatType) -> String {
         let formatter: &dyn DurationFormatter = match format_type {
-            FormatType::Days => &DaysFormatter {},
+            FormatType::Day => &DayFormatter {},
             FormatType::YearMonth => &YearMonthFormatter {},
             FormatType::Default => &DefaultFormatter {},
             FormatType::YearDay => &YearDaysFormatter {}
@@ -334,7 +334,7 @@ mod tests {
         duration(from_year, from_month, from_day,
                  to_year, to_month, to_day)
             .unwrap()
-            .format(&FormatType::Days)
+            .format(&FormatType::Day)
     }
 
     fn year_day_format(from_year: YearImpl, from_month: MonthImpl, from_day: DayImpl,
