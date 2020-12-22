@@ -36,4 +36,26 @@ You want to calculate how many days have you not seen each other (between date 1
 
 Moreover, when you consider months, only complete months between dates matters.
 
-*Update*: to simplify understanding the total number of days strictly between the given dates is also outputed.
+To simplify understanding, by default, the total number of days strictly between the given dates is also outputed.
+
+You can use different formats, if you prefer: 
+1. default
+```
+elapsed since 2015-01-02
+5 years 10 months 50 days (2180 days)
+```
+2. year-day 
+```
+elapsed since 2015-01-02 --format year-day
+5 years 355 days
+```
+3. year-month
+```
+elapsed since 2015-01-02 --format year-month
+5 years 10 months 50 days
+```
+4. day
+```
+elapsed since 2015-01-02 --format days
+2180 days
+```
