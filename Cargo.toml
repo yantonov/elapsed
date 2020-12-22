@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 clap = "3.0.0-beta.1"
 chrono = "0.4.11"
-colored = "1.9.3"
+colored = "2.0.0"
