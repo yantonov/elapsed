@@ -56,6 +56,6 @@ elapsed since 2015-01-02 --format year-month
 ```
 4. day
 ```
-elapsed since 2015-01-02 --format days
+elapsed since 2015-01-02 --format day
 2180 days
 ```
