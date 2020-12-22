@@ -3,6 +3,8 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
+./bin/release.sh
+
 EXECUTABLE_NAME="$(basename $(pwd))"
 
 TARGET="${HOME}/bin/${EXECUTABLE_NAME}"
