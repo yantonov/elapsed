@@ -41,7 +41,7 @@ pub struct Since {
     #[clap(about = "format YYYY-MM-DD")]
     pub date: String,
 
-    #[clap(about = "days | year-day | year-month | default")]
+    #[clap(about = "days | year-day | year-month | default", short, long,)]
     pub format: Option<String>,
 
     pub now: Option<String>,
