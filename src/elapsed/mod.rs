@@ -1,4 +1,3 @@
-use chrono;
 use chrono::{NaiveDate, Datelike};
 use std::cmp::max;
 
@@ -41,7 +40,7 @@ impl DurationFormatter for DayFormatter {
         if duration.total_days == 0 {
             "0 days".to_string()
         } else {
-            format!("{}", format_num(duration.total_days as i32, "day", "days"))
+            format_num(duration.total_days as i32, "day", "days")
         }
     }
 }
@@ -77,14 +76,12 @@ impl DurationFormatter for YearDaysFormatter {
                 let days = duration.total_days % year_day_count;
                 if year == 0 {
                     format_num(days as i32, "day", "days")
+                } else if days == 0 {
+                    format_num(year as i32, "year", "years")
                 } else {
-                    if days == 0 {
-                        format_num(year as i32, "year", "years")
-                    } else {
-                        format!("{} {}",
-                                format_num(year as i32, "year", "years"),
-                                format_num(days as i32, "day", "days"))
-                    }
+                    format!("{} {}",
+                            format_num(year as i32, "year", "years"),
+                            format_num(days as i32, "day", "days"))
                 }
             }
         }
@@ -129,7 +126,7 @@ impl ToString for Duration {
 
 fn month_difference(from: &NaiveDate, to: &NaiveDate) -> MonthImpl {
     if from.year() == to.year() {
-        return max(0, to.month() as i32 - 1 - (from.month() as i32 + 1) + 1) as MonthImpl;
+        max(0, to.month() as i32 - 1 - (from.month() as i32 + 1) + 1) as MonthImpl
     } else {
         (max(0, 12 - (from.month() as i32 + 1) + 1)
             + max(0, to.month() as i32 - 1)) as MonthImpl
@@ -172,7 +169,7 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
         day: day_difference(from, to),
         total_days: max(0, to
             .pred()
-            .signed_duration_since(from.clone())
+            .signed_duration_since(*from)
             .num_days()) as DayImpl,
     })
 }
