@@ -1,15 +1,14 @@
-use clap::{Clap, crate_version};
 use std::str::FromStr;
-use chrono::{NaiveDate, Utc, TimeZone};
+use chrono::{NaiveDate, Utc, DateTime};
+use clap::Parser;
 
-#[derive(Clap)]
-#[clap(version = crate_version ! ())]
+#[derive(Parser)]
 struct Opts {
     #[clap(subcommand)]
     command: Command,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 pub enum Command {
     #[clap(about = "calculate elapsed time since given date", display_order = 0)]
     Since(Since)
@@ -36,12 +35,15 @@ impl FromStr for SinceFormat {
     }
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
+#[clap(about)]
 pub struct Since {
-    #[clap(about = "format YYYY-MM-DD")]
+    #[arg(short, long)]
+    // format YYYY-MM-DD
     pub date: String,
 
-    #[clap(about = "day | year-day | year-month | default", short, long,)]
+    #[arg(short, long)]
+    // day | year-day | year-month | default"
     pub format: Option<String>,
 
     pub now: Option<String>,
@@ -57,34 +59,31 @@ impl Since {
         }
     }
 
-    pub fn get_from(&self) -> Result<NaiveDate, String> {
-        let parsed_from_date = Utc.datetime_from_str(
-            &format!("{} 00:00:00", self.date),
+    fn parse_date(&self, date: &str) -> Result<NaiveDate, String> {
+        let parsed_from_date = DateTime::parse_from_str(
+            &format!("{} 00:00:00", date),
             "%Y-%m-%d %H:%M:%S")
             .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())?;
         Ok(parsed_from_date
-            .date()
-            .naive_local())
+            .date_naive())
+    }
+
+    pub fn get_from(&self) -> Result<NaiveDate, String> {
+        self.parse_date(&self.date)
     }
 
     pub fn get_to(&self) -> Result<NaiveDate, String> {
         Ok(match &self.now {
-            None => Utc::now().date().naive_local(),
+            None => Utc::now().date_naive(),
             Some(now_value) => {
-                let parsed_to_date = Utc.datetime_from_str(
-                    &format!("{} 00:00:00", now_value),
-                    "%Y-%m-%d %H:%M:%S")
-                    .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())?;
-                parsed_to_date
-                    .date()
-                    .naive_local()
+                self.parse_date(now_value).unwrap()
             }
         })
     }
 }
 
 pub struct Arguments {
-    args: Opts
+    args: Opts,
 }
 
 impl Arguments {

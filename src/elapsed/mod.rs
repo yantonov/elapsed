@@ -141,11 +141,13 @@ fn day_difference(from: &NaiveDate, to: &NaiveDate) -> DayImpl {
             max(0, if from.month() == 12 {
                 31 - (from.day() as i32 + 1) + 1
             } else {
-                NaiveDate::from_ymd(
+                NaiveDate::from_ymd_opt(
                     from.year(),
                     from.month() + 1,
                     1)
-                    .pred()
+                    .unwrap()
+                    .pred_opt()
+                    .unwrap()
                     .day() as i32 - (from.day() as i32 + 1) + 1
             })
                 + max(0, to.day() as i32 - 1)) as DayImpl
@@ -168,8 +170,9 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
         month,
         day: day_difference(from, to),
         total_days: max(0, to
-            .pred()
-            .signed_duration_since(*from)
+            .pred_opt()
+            .unwrap()
+            .signed_duration_since(from.clone())
             .num_days()) as DayImpl,
     })
 }
