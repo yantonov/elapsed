@@ -51,7 +51,7 @@ impl DurationFormatter for YearMonthFormatter {
             "0 days".to_string()
         } else {
             let tokens: Vec<String> = vec![
-                format_num(duration.year as i32, "year", "years"),
+                format_num(duration.year, "year", "years"),
                 format_num(duration.month as i32, "month", "months"),
                 format_num(duration.day as i32, "day", "days"),
             ]
@@ -120,9 +120,9 @@ impl Duration {
     }
 }
 
-impl ToString for Duration {
-    fn to_string(&self) -> String {
-        self.format(&FormatType::Default)
+impl std::fmt::Display for Duration {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.format(&FormatType::Default))
     }
 }
 
@@ -174,7 +174,7 @@ pub fn elapsed(from: &NaiveDate, to: &NaiveDate) -> Result<Duration, String> {
             0,
             to.pred_opt()
                 .unwrap()
-                .signed_duration_since(from.clone())
+                .signed_duration_since(*from)
                 .num_days(),
         ) as DayImpl,
     })
@@ -252,7 +252,7 @@ mod tests {
         );
         assert_eq!(
             "11 months 58 days (393 days)",
-            duration(2020, 1, 3, 2021, 01, 31).unwrap().to_string()
+            duration(2020, 1, 3, 2021, 1, 31).unwrap().to_string()
         );
     }
 
@@ -270,7 +270,7 @@ mod tests {
             "2 years 71 days",
             year_day_format(2020, 12, 30, 2023, 3, 12)
         );
-        assert_eq!("1 year 28 days", year_day_format(2020, 1, 3, 2021, 01, 31));
+        assert_eq!("1 year 28 days", year_day_format(2020, 1, 3, 2021, 1, 31));
     }
 
     #[test]
@@ -298,8 +298,8 @@ mod tests {
         to_day: DayImpl,
     ) -> Result<Duration, String> {
         elapsed(
-            &NaiveDate::from_ymd(from_year, from_month, from_day),
-            &NaiveDate::from_ymd(to_year, to_month, to_day),
+            &NaiveDate::from_ymd_opt(from_year, from_month, from_day).unwrap(),
+            &NaiveDate::from_ymd_opt(to_year, to_month, to_day).unwrap(),
         )
     }
 
@@ -338,8 +338,8 @@ mod tests {
         to_day: DayImpl,
     ) -> String {
         elapsed(
-            &NaiveDate::from_ymd(from_year, from_month, from_day),
-            &NaiveDate::from_ymd(to_year, to_month, to_day),
+            &NaiveDate::from_ymd_opt(from_year, from_month, from_day).unwrap(),
+            &NaiveDate::from_ymd_opt(to_year, to_month, to_day).unwrap(),
         )
         .unwrap()
         .format(&FormatType::YearDay)
