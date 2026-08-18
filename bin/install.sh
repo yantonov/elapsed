@@ -7,13 +7,16 @@ cd "$(dirname "$0")/.."
 
 EXECUTABLE_NAME="$(basename $(pwd))"
 
-TARGET="${HOME}/bin/${EXECUTABLE_NAME}"
+TARGET_DIR="${HOME}/.local/bin"
+
+mkdir -p "${TARGET_DIR}"
+
+TARGET="${TARGET_DIR}/${EXECUTABLE_NAME}"
 if [ -f "${TARGET}" ] || [ -L "${TARGET}" ]; then
     echo "Remove old file ${TARGET}"
     rm "${TARGET}"
 fi
 
-echo "Create new link ${TARGET}"
 cp "$(pwd)/target/release/${EXECUTABLE_NAME}" "${TARGET}"
 
-echo 'Done'
+echo "Installed to ${TARGET}"
