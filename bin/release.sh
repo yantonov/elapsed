@@ -13,4 +13,8 @@ cargo build --release
 echo "binary file is here: ${TARGET}"
 
 # reduce binary size
-strip "${TARGET}"
+if command -v strip >/dev/null 2>&1; then
+    strip "${TARGET}"
+else
+    echo "strip not found, skipping binary size reduction"
+fi
