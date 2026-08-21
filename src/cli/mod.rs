@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{NaiveDate, Utc};
 use clap::Parser;
 use std::str::FromStr;
 
@@ -38,15 +38,15 @@ impl FromStr for SinceFormat {
 #[derive(Parser)]
 #[clap(about)]
 pub struct Since {
-    #[arg(short, long)]
-    // format YYYY-MM-DD
+    /// format YYYY-MM-DD
     pub date: String,
 
-    #[arg(short, long)]
-    // day | year-day | year-month | default"
-    pub format: Option<String>,
-
+    /// format YYYY-MM-DD, current date is used by default
     pub now: Option<String>,
+
+    /// day | year-day | year-month | default
+    #[arg(short, long)]
+    pub format: Option<String>,
 }
 
 impl Since {
@@ -58,10 +58,8 @@ impl Since {
     }
 
     fn parse_date(&self, date: &str) -> Result<NaiveDate, String> {
-        let parsed_from_date =
-            DateTime::parse_from_str(&format!("{} 00:00:00", date), "%Y-%m-%d %H:%M:%S")
-                .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())?;
-        Ok(parsed_from_date.date_naive())
+        NaiveDate::parse_from_str(date, "%Y-%m-%d")
+            .map_err(|_| "Date should follow the YYYY-MM-DD format".to_string())
     }
 
     pub fn get_from(&self) -> Result<NaiveDate, String> {
@@ -69,10 +67,10 @@ impl Since {
     }
 
     pub fn get_to(&self) -> Result<NaiveDate, String> {
-        Ok(match &self.now {
-            None => Utc::now().date_naive(),
-            Some(now_value) => self.parse_date(now_value).unwrap(),
-        })
+        match &self.now {
+            None => Ok(Utc::now().date_naive()),
+            Some(now_value) => self.parse_date(now_value),
+        }
     }
 }
 

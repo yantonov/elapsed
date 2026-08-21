@@ -14,7 +14,7 @@ fn entry_point() -> Result<(), String> {
             let result = since.format()?;
             println!(
                 "{}",
-                elapsed::elapsed(&from, &to).unwrap().format(&match result {
+                elapsed::elapsed(&from, &to)?.format(&match result {
                     SinceFormat::Day => FormatType::Day,
                     SinceFormat::YearDay => FormatType::YearDay,
                     SinceFormat::YearMonth => FormatType::YearMonth,
