@@ -4,6 +4,7 @@ use colored::Colorize;
 
 mod cli;
 mod elapsed;
+mod version;
 
 fn entry_point() -> Result<(), String> {
     let arguments = cli::arguments();
@@ -21,6 +22,9 @@ fn entry_point() -> Result<(), String> {
                     SinceFormat::Default => FormatType::Default,
                 })
             );
+        }
+        Command::Version => {
+            println!("{}", version::version_info());
         }
     }
     Ok(())

@@ -1,8 +1,10 @@
+use crate::version::VERSION_WITH_COMMIT_HASH;
 use chrono::{NaiveDate, Utc};
 use clap::Parser;
 use std::str::FromStr;
 
 #[derive(Parser)]
+#[clap(version = VERSION_WITH_COMMIT_HASH)]
 struct Opts {
     #[clap(subcommand)]
     command: Command,
@@ -12,6 +14,12 @@ struct Opts {
 pub enum Command {
     #[clap(about = "calculate elapsed time since given date", display_order = 0)]
     Since(Since),
+
+    #[clap(
+        about = "show the version and the commit hash of this binary",
+        display_order = 1
+    )]
+    Version,
 }
 
 pub enum SinceFormat {

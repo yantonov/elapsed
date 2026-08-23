@@ -251,3 +251,62 @@ fn help_describes_the_since_command() {
         help
     );
 }
+
+/// The binary reports the version together with the full hash of the commit
+/// it was built from, so a binary found on a machine can be traced back
+/// to the exact sources.
+#[test]
+fn version_command_shows_the_version_and_the_full_commit_hash() {
+    let output = elapsed(&["version"]);
+
+    let (name, version_and_hash) = output
+        .split_once(' ')
+        .unwrap_or_else(|| panic!("unexpected version output: {}", output));
+    assert_eq!(env!("CARGO_PKG_NAME"), name);
+
+    let (version, hash) = version_and_hash
+        .split_once(' ')
+        .unwrap_or_else(|| panic!("the commit hash is missing: {}", output));
+    assert_eq!(env!("CARGO_PKG_VERSION"), version);
+
+    let hash = hash
+        .strip_prefix('(')
+        .and_then(|value| value.strip_suffix(')'))
+        .unwrap_or_else(|| panic!("the commit hash is not parenthesized: {}", output));
+    // the full hash, not the abbreviated one
+    assert_eq!(
+        40,
+        hash.len(),
+        "the full commit hash is expected, got: {}",
+        hash
+    );
+    assert!(
+        hash.chars().all(|c| c.is_ascii_hexdigit()),
+        "not a commit hash: {}",
+        hash
+    );
+}
+
+/// The flag and the command are two spellings of the same thing.
+#[test]
+fn version_flag_matches_the_version_command() {
+    let expected = elapsed(&["version"]);
+    for flag in ["--version", "-V"] {
+        assert_eq!(expected, elapsed(&[flag]), "{}", flag);
+    }
+}
+
+#[test]
+fn help_mentions_the_version_command() {
+    let help = elapsed(&["--help"]);
+    assert!(
+        help.contains("version"),
+        "the version command is not documented:\n{}",
+        help
+    );
+}
+
+#[test]
+fn version_command_takes_no_arguments() {
+    usage_error(&["version", "2020-01-01"]);
+}
